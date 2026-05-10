@@ -1,0 +1,16 @@
+{
+  "Id": "11111111-1111-1111-1111-111111111111",
+  "Code": "crm_get_customer",
+  "Name": "Get Customer",
+  "Description": "Retrieves a CRM customer record by customer ID. Returns full customer details including name, email, tier, and account status.",
+  "Type": "lookup",
+  "Category": "crm",
+  "Tags": ["crm", "customer", "read"],
+  "Enabled": true,
+  "Version": 1,
+  "InputSchema": "{\"type\":\"object\",\"properties\":{\"customerId\":{\"type\":\"string\",\"description\":\"The unique customer identifier\"}},\"required\":[\"customerId\"]}",
+  "OutputSchema": "{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"tier\":{\"type\":\"string\"},\"status\":{\"type\":\"string\"}}}",
+  "HandlerRoute": "crm.get_customer",
+  "CreatedAt": "2026-05-10T00:00:00Z",
+  "UpdatedAt": "2026-05-10T00:00:00Z"
+}

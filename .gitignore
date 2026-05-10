@@ -1,0 +1,18 @@
+## .NET build outputs
+obj/
+bin/
+*.user
+*.suo
+.vs/
+
+## NuGet packages
+*.nupkg
+*.snupkg
+[Pp]ackages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## OS
+.DS_Store
+Thumbs.db

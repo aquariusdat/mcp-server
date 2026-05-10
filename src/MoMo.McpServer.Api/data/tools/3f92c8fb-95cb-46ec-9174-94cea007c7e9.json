@@ -1,0 +1,16 @@
+{
+  "InputSchema": "{}",
+  "OutputSchema": "{}",
+  "HandlerRoute": "test.tool",
+  "Id": "3f92c8fb-95cb-46ec-9174-94cea007c7e9",
+  "Code": "crm_disable_test",
+  "Name": "Test Tool",
+  "Description": "Test",
+  "Type": "test",
+  "Category": "test",
+  "Tags": [],
+  "Enabled": true,
+  "Version": 1,
+  "CreatedAt": "2026-05-10T13:15:52.0589901+00:00",
+  "UpdatedAt": "2026-05-10T13:15:52.0589902+00:00"
+}

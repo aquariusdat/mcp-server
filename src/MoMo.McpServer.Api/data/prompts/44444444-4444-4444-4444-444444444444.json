@@ -1,0 +1,26 @@
+{
+  "Id": "44444444-4444-4444-4444-444444444444",
+  "Code": "crm_customer_summary_prompt",
+  "Name": "Customer Summary Prompt",
+  "Description": "Generates a concise summary of a customer's account status and recent activity for use in agent conversations.",
+  "Type": "summary",
+  "Category": "crm",
+  "Tags": ["crm", "customer", "summary", "agent"],
+  "Enabled": true,
+  "Version": 1,
+  "Template": "Provide a concise account summary for customer {{customerId}}. Include their current tier, recent transactions in the last {{days}} days, and any open support tickets. Format as a brief paragraph suitable for a customer service agent.",
+  "Arguments": [
+    {
+      "Name": "customerId",
+      "Description": "The unique customer identifier",
+      "Required": true
+    },
+    {
+      "Name": "days",
+      "Description": "Number of days of recent activity to include",
+      "Required": false
+    }
+  ],
+  "CreatedAt": "2026-05-10T00:00:00Z",
+  "UpdatedAt": "2026-05-10T00:00:00Z"
+}

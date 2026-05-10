@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MoMo.McpServer.Api/MoMo.McpServer.Api.csproj" />
+    <Project Path="src/MoMo.McpServer.Application/MoMo.McpServer.Application.csproj" />
+    <Project Path="src/MoMo.McpServer.Contract/MoMo.McpServer.Contract.csproj" />
+    <Project Path="src/MoMo.McpServer.Domain/MoMo.McpServer.Domain.csproj" />
+    <Project Path="src/MoMo.McpServer.Infrastructure/MoMo.McpServer.Infrastructure.csproj" />
+  </Folder>
+</Solution>

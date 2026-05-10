@@ -1,0 +1,16 @@
+{
+  "Id": "33333333-3333-3333-3333-333333333333",
+  "Code": "crm_customers_resource",
+  "Name": "CRM Customers Resource",
+  "Description": "Static resource exposing the CRM customer data schema and available fields.",
+  "Type": "static",
+  "Category": "crm",
+  "Tags": ["crm", "customer", "schema"],
+  "Enabled": true,
+  "Version": 1,
+  "Uri": "momo://crm/customers",
+  "MimeType": "application/json",
+  "HandlerRoute": "crm.customers_resource",
+  "CreatedAt": "2026-05-10T00:00:00Z",
+  "UpdatedAt": "2026-05-10T00:00:00Z"
+}
