@@ -7,7 +7,7 @@ namespace MoMo.McpServer.Application.Mapping;
 
 /// <summary>
 /// Extension methods for mapping domain entities to contract response DTOs.
-/// Kept in Application to avoid infrastructure or API knowledge bleeding into Domain.
+/// Kept in Application layer — bridges Domain ↔ Contract without coupling either direction.
 /// </summary>
 public static class DefinitionMapper
 {

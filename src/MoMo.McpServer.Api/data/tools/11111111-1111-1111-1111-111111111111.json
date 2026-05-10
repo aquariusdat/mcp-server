@@ -8,8 +8,26 @@
   "Tags": ["crm", "customer", "read"],
   "Enabled": true,
   "Version": 1,
-  "InputSchema": "{\"type\":\"object\",\"properties\":{\"customerId\":{\"type\":\"string\",\"description\":\"The unique customer identifier\"}},\"required\":[\"customerId\"]}",
-  "OutputSchema": "{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"tier\":{\"type\":\"string\"},\"status\":{\"type\":\"string\"}}}",
+  "InputSchema": {
+    "type": "object",
+    "properties": {
+      "customerId": {
+        "type": "string",
+        "description": "The unique customer identifier"
+      }
+    },
+    "required": ["customerId"]
+  },
+  "OutputSchema": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "name": { "type": "string" },
+      "email": { "type": "string" },
+      "tier": { "type": "string" },
+      "status": { "type": "string" }
+    }
+  },
   "HandlerRoute": "crm.get_customer",
   "CreatedAt": "2026-05-10T00:00:00Z",
   "UpdatedAt": "2026-05-10T00:00:00Z"

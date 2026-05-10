@@ -1,23 +1,29 @@
 using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
-using MoMo.McpServer.Application.Interfaces;
+using MoMo.McpServer.Application.Runtime;
 
 namespace MoMo.McpServer.Api.Runtime;
 
 /// <summary>
 /// MCP Runtime Prompt provider.
-/// Exposes a meta-tool to list available MoMo prompt templates to MCP clients.
+/// Exposes enabled prompt definitions to MCP clients.
+/// Uses IPromptCapabilityProvider — no direct repository access.
 /// </summary>
 [McpServerToolType]
-public sealed class McpPromptProvider(IPromptRepository promptRepository)
+public sealed class McpPromptProvider(IPromptCapabilityProvider capabilityProvider)
 {
+    private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
+
+    /// <summary>
+    /// Lists all enabled MoMo MCP prompt definitions with their metadata and arguments.
+    /// </summary>
     [McpServerTool(Name = "momo_list_prompts")]
-    [Description("List all available MoMo MCP prompts (for discovery and introspection)")]
+    [Description("List all enabled MoMo MCP prompts with their metadata and argument definitions (for discovery and introspection)")]
     public async Task<string> ListAvailablePromptsAsync(CancellationToken cancellationToken = default)
     {
-        var prompts = await promptRepository.GetAllAsync(cancellationToken);
-        var enabled = prompts.Where(p => p.Enabled).Select(p => new
+        var prompts = await capabilityProvider.GetEnabledPromptsAsync(cancellationToken);
+        var summary = prompts.Select(p => new
         {
             p.Code,
             p.Name,
@@ -27,6 +33,6 @@ public sealed class McpPromptProvider(IPromptRepository promptRepository)
             p.Tags,
             Arguments = p.Arguments.Select(a => new { a.Name, a.Description, a.Required }),
         });
-        return JsonSerializer.Serialize(enabled, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(summary, JsonOpts);
     }
 }

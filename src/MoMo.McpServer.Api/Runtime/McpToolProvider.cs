@@ -1,42 +1,85 @@
 using System.ComponentModel;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using ModelContextProtocol.Server;
-using MoMo.McpServer.Application.Interfaces;
+using MoMo.McpServer.Application.Runtime;
 
 namespace MoMo.McpServer.Api.Runtime;
 
 /// <summary>
 /// MCP Runtime Tool provider.
-/// Reads enabled tool definitions from storage and exposes them to MCP clients.
-/// This is the bridge between the Management Layer storage and the MCP protocol runtime.
+/// Exposes enabled tool definitions to MCP clients via the MCP protocol.
 ///
-/// How it works:
-/// - At startup, the MCP SDK discovers this type via WithToolsFromAssembly
-/// - When a client calls tools/list, all [McpServerTool] methods are enumerated
-/// - When a client calls a tool by name, the matching method is invoked
+/// Responsibilities:
+/// - Enumerate enabled tools for tools/list (momo_list_tools meta-tool)
+/// - Delegate actual tool execution to IToolRegistry → IToolExecutor
 ///
-/// To extend: add new tool definitions via the /admin/tools API.
-/// No code changes needed to expose new metadata to MCP clients.
+/// This class is intentionally thin. All capability data comes from IToolCapabilityProvider.
+/// All execution routing goes through IToolRegistry. No direct repository access.
 /// </summary>
 [McpServerToolType]
-public sealed class McpToolProvider(IToolRepository toolRepository)
+public sealed class McpToolProvider(
+    IToolCapabilityProvider capabilityProvider,
+    IToolRegistry toolRegistry)
 {
+    private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
+
     /// <summary>
-    /// Lists all enabled MoMo MCP tools with their metadata for introspection.
+    /// Lists all enabled MoMo MCP tool definitions with their metadata.
+    /// Use this for discovery and introspection before calling a specific tool.
     /// </summary>
     [McpServerTool(Name = "momo_list_tools")]
-    [Description("List all available MoMo MCP tools with metadata (for discovery and introspection)")]
+    [Description("List all enabled MoMo MCP tools with their metadata (for discovery and introspection)")]
     public async Task<string> ListAvailableToolsAsync(CancellationToken cancellationToken = default)
     {
-        var tools = await toolRepository.GetAllAsync(cancellationToken);
-        var enabled = tools.Where(t => t.Enabled).Select(t => new
+        var tools = await capabilityProvider.GetEnabledToolsAsync(cancellationToken);
+        var summary = tools.Select(t => new
         {
             t.Code,
             t.Name,
             t.Description,
             t.Category,
             t.Tags,
+            t.HandlerRoute,
         });
-        return JsonSerializer.Serialize(enabled, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(summary, JsonOpts);
+    }
+
+    /// <summary>
+    /// Invokes a registered MoMo tool by its code.
+    /// Returns an error message if the tool is not found or no executor is registered.
+    /// </summary>
+    [McpServerTool(Name = "momo_invoke_tool")]
+    [Description("Invoke a registered MoMo tool by its code with the provided arguments")]
+    public async Task<string> InvokeToolAsync(
+        [Description("The tool code to invoke (e.g. 'crm.get_customer')")] string toolCode,
+        [Description("JSON string of key-value arguments for the tool")] string argumentsJson = "{}",
+        CancellationToken cancellationToken = default)
+    {
+        // Resolve the tool definition
+        var tool = await capabilityProvider.FindEnabledToolAsync(toolCode, cancellationToken);
+        if (tool is null)
+            return JsonSerializer.Serialize(ToolExecutionResult.Error($"Tool '{toolCode}' not found or is disabled."), JsonOpts);
+
+        // Resolve the executor
+        var executor = toolRegistry.Resolve(tool.HandlerRoute);
+        if (executor is null)
+            return JsonSerializer.Serialize(ToolExecutionResult.Error($"Tool '{toolCode}' has no registered executor (HandlerRoute: '{tool.HandlerRoute}'). Register an IToolExecutor implementation."), JsonOpts);
+
+        // Parse arguments
+        IReadOnlyDictionary<string, string?> args;
+        try
+        {
+            args = JsonSerializer.Deserialize<Dictionary<string, string?>>(argumentsJson)
+                   ?? new Dictionary<string, string?>();
+        }
+        catch
+        {
+            return JsonSerializer.Serialize(ToolExecutionResult.Error("argumentsJson is not valid JSON."), JsonOpts);
+        }
+
+        var context = new ToolExecutionContext(tool.HandlerRoute, args);
+        var result = await executor.ExecuteAsync(context, cancellationToken);
+        return JsonSerializer.Serialize(result, JsonOpts);
     }
 }

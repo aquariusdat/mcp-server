@@ -1,0 +1,25 @@
+{
+  "InputSchema": {
+    "type": "object",
+    "properties": {
+      "test": {
+        "type": "string"
+      }
+    }
+  },
+  "OutputSchema": {
+    "type": "object"
+  },
+  "HandlerRoute": "test",
+  "Id": "541fee17-03d3-4886-8c89-25e59e0a655e",
+  "Code": "test_node",
+  "Name": "Node Test",
+  "Description": "Testing JsonNode",
+  "Type": "test",
+  "Category": "test",
+  "Tags": [],
+  "Enabled": true,
+  "Version": 1,
+  "CreatedAt": "2026-05-10T13:44:20.2011425+00:00",
+  "UpdatedAt": "2026-05-10T13:44:20.201143+00:00"
+}

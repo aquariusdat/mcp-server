@@ -43,11 +43,14 @@ Unit                                 — void return type for commands
 
 *(Same pattern for Resources and Prompts)*
 
+## Runtime Capability Providers
+
+The Application layer also provides the boundary for the MCP Runtime via Capability Providers (`IToolCapabilityProvider`, etc.). These wrap the repositories to only expose **enabled** definitions for discovery.
+
 ## Handler Registration
 
-All handlers are registered in `ApplicationServiceExtensions.AddApplicationServices()`.
-Call `services.AddApplicationServices()` from `Program.cs`.
+All handlers and capability providers are registered in `ApplicationServiceExtensions.AddApplicationServices()`.
 
 ## Mapping
 
-`DefinitionMapper` (in `Application/Mapping/`) contains extension methods to map domain entities to response DTOs. This keeps Domain clean and avoids DTO knowledge in Infrastructure.
+`DefinitionMapper` (in `Application/Mapping/`) contains extension methods to map domain entities to response DTOs.

@@ -8,8 +8,37 @@
   "Tags": ["crm", "customer", "search", "read"],
   "Enabled": true,
   "Version": 1,
-  "InputSchema": "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"Search term (name, email, or partial match)\"},\"tier\":{\"type\":\"string\",\"description\":\"Filter by customer tier\",\"enum\":[\"standard\",\"premium\",\"vip\"]},\"limit\":{\"type\":\"integer\",\"description\":\"Max results to return\",\"default\":20}}}",
-  "OutputSchema": "{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"tier\":{\"type\":\"string\"}}}}",
+  "InputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Search term (name, email, or partial match)"
+      },
+      "tier": {
+        "type": "string",
+        "description": "Filter by customer tier",
+        "enum": ["standard", "premium", "vip"]
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Max results to return",
+        "default": 20
+      }
+    }
+  },
+  "OutputSchema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "tier": { "type": "string" }
+      }
+    }
+  },
   "HandlerRoute": "crm.search_customers",
   "CreatedAt": "2026-05-10T00:00:00Z",
   "UpdatedAt": "2026-05-10T00:00:00Z"

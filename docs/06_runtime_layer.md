@@ -2,51 +2,32 @@
 
 ## Overview
 
-The Runtime Layer exposes MCP-compliant endpoints consumed by AI clients (Claude Desktop, GPT, Gemini).
+The Runtime Layer exposes MCP-compliant endpoints consumed by AI clients (Claude Desktop, GPT, Gemini). It uses the official `ModelContextProtocol.AspNetCore` SDK (v1.3.0).
 
-It uses the official `ModelContextProtocol.AspNetCore` SDK (v1.3.0).
+## Separation of Concerns
 
-## How It Works
+The runtime layer is strictly separated from the management (storage) layer via two abstractions:
 
-1. `AddMcpServer().WithHttpTransport().WithToolsFromAssembly(...)` is called in `Program.cs`
-2. The SDK discovers classes decorated with `[McpServerToolType]`
-3. Methods decorated with `[McpServerTool]` are exposed as MCP tools
-4. The SDK handles the full MCP protocol: `initialize`, `tools/list`, `tools/call`, SSE transport
+1. **Capability Providers** (`IToolCapabilityProvider`): Expose only the *enabled* definitions for MCP discovery. The runtime cannot modify definitions or see disabled ones.
+2. **Executors** (`IToolExecutor` & `IToolRegistry`): Provide the logic to actually *run* a tool when invoked by an MCP client.
 
 ## Provider Classes
 
-Located in `Api/Runtime/`:
+Located in `Api/Runtime/`, these classes are discovered automatically by the MCP SDK:
 
-| Class | MCP Tool Name | Description |
+| Class | Capability Provider | Purpose |
 |---|---|---|
-| `McpToolProvider` | `momo_list_tools` | Lists enabled tool definitions |
-| `McpResourceProvider` | `momo_list_resources` | Lists enabled resource definitions |
-| `McpPromptProvider` | `momo_list_prompts` | Lists enabled prompt definitions |
+| `McpToolProvider` | `IToolCapabilityProvider` | Lists tools (`momo_list_tools`) and dispatches execution (`momo_invoke_tool`) |
+| `McpResourceProvider` | `IResourceCapabilityProvider` | Lists resources (`momo_list_resources`) |
+| `McpPromptProvider` | `IPromptCapabilityProvider` | Lists prompts (`momo_list_prompts`) |
 
-## Connecting Claude Desktop
+## Tool Execution Flow
 
-Add to `claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "momo": {
-      "url": "http://localhost:5000/mcp"
-    }
-  }
-}
-```
+When an MCP client invokes `momo_invoke_tool`:
+1. `McpToolProvider` receives the `toolCode` and JSON `arguments`.
+2. It fetches the definition via `IToolCapabilityProvider.FindEnabledToolAsync()`.
+3. It resolves the executor via `IToolRegistry.Resolve(tool.HandlerRoute)`.
+4. It calls `IToolExecutor.ExecuteAsync(context)`.
+5. The resulting `ToolExecutionResult` is serialized and returned to the MCP client.
 
-## Architecture Notes
-
-- Runtime providers are **thin** — they only read from repositories
-- No business logic in providers
-- New tools don't require code changes — register via `/admin/tools` API
-- Future: implement real tool dispatch (HTTP, gRPC, serverless) via `HandlerRoute`
-
-## Extending the Runtime
-
-To add a real callable tool:
-1. Register the tool via `POST /admin/tools` with an appropriate `HandlerRoute`
-2. Add a new `[McpServerTool]`-decorated method in a provider class
-3. Method reads the stored definition, dispatches to the handler
-4. Return the result as a string (MCP content format)
+*(MVP Note: The default `IToolRegistry` is a `NoOpToolRegistry` that logs and returns null).*

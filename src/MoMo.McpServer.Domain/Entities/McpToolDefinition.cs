@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace MoMo.McpServer.Domain.Entities;
 
 /// <summary>
@@ -7,21 +9,23 @@ namespace MoMo.McpServer.Domain.Entities;
 public sealed class McpToolDefinition : BaseDefinition
 {
     /// <summary>
-    /// JSON Schema string describing the tool's input parameters.
-    /// Must conform to JSON Schema draft-07 as required by MCP spec.
+    /// JSON Schema object describing the tool's input parameters.
+    /// Must conform to JSON Schema draft-07 as required by the MCP spec.
+    /// Stored as a JsonNode to ensure structural validity and clean serialization.
     /// Example: {"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}
     /// </summary>
-    public string InputSchema { get; set; } = "{}";
+    public JsonNode? InputSchema { get; set; } = JsonNode.Parse("{}");
 
     /// <summary>
-    /// Optional JSON Schema describing the tool's output structure.
+    /// Optional JSON Schema object describing the tool's output structure.
+    /// May be null or an empty object if the output schema is not defined.
     /// </summary>
-    public string OutputSchema { get; set; } = "{}";
+    public JsonNode? OutputSchema { get; set; } = JsonNode.Parse("{}");
 
     /// <summary>
     /// Internal handler route key used to dispatch tool invocations.
-    /// Maps to a concrete handler registered in the application layer.
-    /// Example: "crm.get_customer"
+    /// Maps to a concrete IToolExecutor registered in the runtime layer.
+    /// Convention: "{domain}.{action}" e.g. "crm.get_customer"
     /// </summary>
     public string HandlerRoute { get; set; } = string.Empty;
 }

@@ -5,6 +5,7 @@ using MoMo.McpServer.Application.Prompts.Commands;
 using MoMo.McpServer.Application.Prompts.Queries;
 using MoMo.McpServer.Application.Resources.Commands;
 using MoMo.McpServer.Application.Resources.Queries;
+using MoMo.McpServer.Application.Runtime;
 using MoMo.McpServer.Application.Tools.Commands;
 using MoMo.McpServer.Application.Tools.Queries;
 using MoMo.McpServer.Contract.Prompts;
@@ -14,17 +15,27 @@ using MoMo.McpServer.Contract.Tools;
 namespace MoMo.McpServer.Application.DependencyInjection;
 
 /// <summary>
-/// Registers all Application layer services: dispatcher + all CQRS handlers.
+/// Registers all Application layer services:
+/// - CQRS dispatcher
+/// - All command and query handlers (management layer)
+/// - Runtime capability providers (runtime layer)
 /// Call this from the Api project startup.
 /// </summary>
 public static class ApplicationServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Dispatcher (in-house mediator)
+        // ── Dispatcher (in-house mediator, no external library) ────────────────
         services.AddScoped<IDispatcher, Dispatcher.Dispatcher>();
 
-        // ── Tool handlers ──────────────────────────────────────────────────
+        // ── Runtime capability providers ───────────────────────────────────────
+        // These provide the seam between storage and the MCP runtime layer.
+        // Runtime providers (Api/Runtime/) inject these, not raw repositories.
+        services.AddScoped<IToolCapabilityProvider, ToolCapabilityProvider>();
+        services.AddScoped<IResourceCapabilityProvider, ResourceCapabilityProvider>();
+        services.AddScoped<IPromptCapabilityProvider, PromptCapabilityProvider>();
+
+        // ── Tool handlers ──────────────────────────────────────────────────────
         services.AddScoped<ICommandHandler<CreateToolCommand, ToolResponse>, CreateToolCommandHandler>();
         services.AddScoped<ICommandHandler<UpdateToolCommand, ToolResponse?>, UpdateToolCommandHandler>();
         services.AddScoped<ICommandHandler<DeleteToolCommand, bool>, DeleteToolCommandHandler>();
@@ -33,7 +44,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IQueryHandler<GetToolByIdQuery, ToolResponse?>, GetToolByIdQueryHandler>();
         services.AddScoped<IQueryHandler<ListToolsQuery, IReadOnlyList<ToolResponse>>, ListToolsQueryHandler>();
 
-        // ── Resource handlers ──────────────────────────────────────────────
+        // ── Resource handlers ──────────────────────────────────────────────────
         services.AddScoped<ICommandHandler<CreateResourceCommand, ResourceResponse>, CreateResourceCommandHandler>();
         services.AddScoped<ICommandHandler<UpdateResourceCommand, ResourceResponse?>, UpdateResourceCommandHandler>();
         services.AddScoped<ICommandHandler<DeleteResourceCommand, bool>, DeleteResourceCommandHandler>();
@@ -42,7 +53,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IQueryHandler<GetResourceByIdQuery, ResourceResponse?>, GetResourceByIdQueryHandler>();
         services.AddScoped<IQueryHandler<ListResourcesQuery, IReadOnlyList<ResourceResponse>>, ListResourcesQueryHandler>();
 
-        // ── Prompt handlers ────────────────────────────────────────────────
+        // ── Prompt handlers ────────────────────────────────────────────────────
         services.AddScoped<ICommandHandler<CreatePromptCommand, PromptResponse>, CreatePromptCommandHandler>();
         services.AddScoped<ICommandHandler<UpdatePromptCommand, PromptResponse?>, UpdatePromptCommandHandler>();
         services.AddScoped<ICommandHandler<DeletePromptCommand, bool>, DeletePromptCommandHandler>();

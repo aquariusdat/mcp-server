@@ -8,46 +8,35 @@
 │  (Minimal API endpoints, MCP runtime, DI wiring)         │
 ├──────────────────────────────────────────────────────────┤
 │  Infrastructure                                          │
-│  (File-based JSON storage, serialization)                │
+│  (File-based JSON storage, NoOpToolRegistry)             │
 ├──────────────────────────────────────────────────────────┤
 │  Application                                             │
-│  (CQRS commands, queries, handlers, interfaces)          │
+│  (CQRS handlers, capability providers, executors)        │
 ├──────────────────────────────────────────────────────────┤
-│  Contract                                                │
-│  (DTOs, request/response models)                         │
-├──────────────────────────────────────────────────────────┤
-│  Domain                                                  │
-│  (Entities, business rules — no dependencies)            │
+│  Contract                        Domain                  │
+│  (DTOs, ApiResponse)             (Entities, rules)       │
 └──────────────────────────────────────────────────────────┘
 ```
 
 ## Dependency Direction
 
-```
-Domain ← Contract ← Application ← Infrastructure
-                              ↑
-                             Api
-```
+- **Domain** depends on nothing.
+- **Contract** depends on nothing. (Pure DTOs).
+- **Application** depends on Domain + Contract.
+- **Infrastructure** depends on Domain + Application.
+- **Api** depends on Application + Contract + Infrastructure.
 
-- Dependencies flow **inward** only.
-- **Domain** has zero dependencies.
-- **Application** depends on Domain + Contract (not Infrastructure).
-- **Infrastructure** implements Application interfaces.
-- **Api** references Application + Contract + Infrastructure for DI wiring only.
+*Dependencies flow inward to Application/Domain. Contract and Domain are independent siblings.*
 
-## Project References
+## Architectural Seams
 
-| Project | References |
-|---|---|
-| Domain | (none) |
-| Contract | Domain |
-| Application | Domain, Contract |
-| Infrastructure | Domain, Application |
-| Api | Application, Contract, Infrastructure |
+### 1. Management Seam (CQRS)
+API endpoints use `IDispatcher` to send commands/queries to the Application layer.
+Application layer uses `IToolRepository` to read/write from Infrastructure.
 
-## Two Runtime Concerns
+### 2. Runtime Capability Seam
+MCP Runtime Providers (`Api/Runtime/`) use `IToolCapabilityProvider` to read enabled tools.
+They **do not** have access to the underlying `IToolRepository`.
 
-| Concern | Routes | Description |
-|---|---|---|
-| Management Layer | `/admin/...` | Admin REST API for CRUD |
-| Runtime Layer | `/mcp` | MCP protocol endpoint for AI clients |
+### 3. Execution Seam
+When an MCP client invokes a tool, the runtime asks `IToolRegistry` for an `IToolExecutor` mapped to the tool's `HandlerRoute`. The executor handles the actual work and returns a `ToolExecutionResult`.

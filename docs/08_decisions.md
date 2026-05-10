@@ -1,66 +1,29 @@
 # 08 — Architecture Decision Records
 
 ## ADR-001: Manual CQRS Without MediatR
-
 **Decision**: Build CQRS dispatcher manually using reflection + DI.
-
-**Rationale**:
-- Removes external dependency
-- Simpler to understand for new .NET developers
-- Full control over dispatch behavior
-- Slightly more verbose registration but explicit
-
-**Trade-off**: Handler registration in `ApplicationServiceExtensions` must be updated manually when new handlers are added.
+**Rationale**: Removes external dependency, keeps dispatcher simple and explicitly wired.
 
 ---
 
 ## ADR-002: Local JSON File Storage for MVP
-
 **Decision**: Store definitions as JSON files, one per entity.
-
-**Rationale**:
-- Zero infrastructure dependencies (no DB, no Redis)
-- Human-readable files for easy debugging
-- Simple to bootstrap for a new team
-- Easy to replace with EF Core/PostgreSQL later
-
-**Trade-off**: Not suitable for high concurrency. Acceptable for MVP admin workloads.
+**Rationale**: Zero infrastructure dependencies, human-readable, easy to swap for a DB later.
 
 ---
 
-## ADR-003: Official MCP C# SDK
-
-**Decision**: Use `ModelContextProtocol.AspNetCore` v1.3.0.
-
-**Rationale**:
-- Official SDK co-maintained by Microsoft
-- Handles full MCP protocol compliance
-- Attribute-based tool registration is clean
-- HTTP/SSE transport out of the box
-
-**Trade-off**: SDK is evolving; API may change. Pinned to 1.3.0 for stability.
+## ADR-003: JsonNode for JSON Schemas
+**Decision**: Store MCP schemas (`InputSchema`, `OutputSchema`) as `JsonNode` instead of `string`.
+**Rationale**: Prevents nested string escaping issues. Ensures schema validity at the API boundary. Serializes cleanly via System.Text.Json.
 
 ---
 
-## ADR-004: Two Separate Layers
-
-**Decision**: Management Layer (REST) and Runtime Layer (MCP) are distinct concerns in the same host.
-
-**Rationale**:
-- Clear separation of admin vs. runtime concerns
-- Runtime layer stays thin and reads from the same store
-- Simple deployment (one host)
-
-**Future**: May split into separate services if scaling needs differ.
+## ADR-004: Strict Contract Layer Independence
+**Decision**: The `Contract` project must not reference the `Domain` project.
+**Rationale**: Keeps DTOs pure. Allows publishing the Contract assembly as a standalone NuGet package for clients without dragging in business logic or entities.
 
 ---
 
-## ADR-005: No Auth in MVP
-
-**Decision**: No authentication or authorization.
-
-**Rationale**:
-- MVP scope — deploy on internal network
-- Auth adds complexity; YAGNI at this stage
-
-**Future**: Add API key or JWT when exposing externally.
+## ADR-005: Runtime Capability & Execution Seams
+**Decision**: Introduce `IToolCapabilityProvider`, `IToolRegistry`, and `IToolExecutor`.
+**Rationale**: Prevents `McpToolProvider` from becoming a God Class. Clearly separates reading metadata (capability) from doing work (execution) from storage (repository).

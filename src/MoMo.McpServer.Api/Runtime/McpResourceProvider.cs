@@ -1,23 +1,29 @@
 using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
-using MoMo.McpServer.Application.Interfaces;
+using MoMo.McpServer.Application.Runtime;
 
 namespace MoMo.McpServer.Api.Runtime;
 
 /// <summary>
 /// MCP Runtime Resource provider.
-/// Exposes a meta-tool to list available MoMo resources to MCP clients.
+/// Exposes enabled resource definitions to MCP clients.
+/// Uses IResourceCapabilityProvider — no direct repository access.
 /// </summary>
 [McpServerToolType]
-public sealed class McpResourceProvider(IResourceRepository resourceRepository)
+public sealed class McpResourceProvider(IResourceCapabilityProvider capabilityProvider)
 {
+    private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
+
+    /// <summary>
+    /// Lists all enabled MoMo MCP resource definitions with their metadata.
+    /// </summary>
     [McpServerTool(Name = "momo_list_resources")]
-    [Description("List all available MoMo MCP resources (for discovery and introspection)")]
+    [Description("List all enabled MoMo MCP resources with their metadata (for discovery and introspection)")]
     public async Task<string> ListAvailableResourcesAsync(CancellationToken cancellationToken = default)
     {
-        var resources = await resourceRepository.GetAllAsync(cancellationToken);
-        var enabled = resources.Where(r => r.Enabled).Select(r => new
+        var resources = await capabilityProvider.GetEnabledResourcesAsync(cancellationToken);
+        var summary = resources.Select(r => new
         {
             r.Code,
             r.Name,
@@ -27,6 +33,6 @@ public sealed class McpResourceProvider(IResourceRepository resourceRepository)
             r.Category,
             r.Tags,
         });
-        return JsonSerializer.Serialize(enabled, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(summary, JsonOpts);
     }
 }
