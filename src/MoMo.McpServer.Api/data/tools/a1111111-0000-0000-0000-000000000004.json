@@ -1,0 +1,26 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000004",
+    "Code":  "momo_crm_get_skill_matrix",
+    "Name":  "Get Skill Matrix",
+    "Description":  "Returns mapping of technical/domain skills to team members.",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "object"
+                     },
+    "HandlerRoute":  "momo.crm.get_skill_matrix",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

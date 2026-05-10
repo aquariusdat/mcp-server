@@ -1,0 +1,31 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000010",
+    "Code":  "momo_crm_draft_task_breakdown",
+    "Name":  "Draft Task Breakdown",
+    "Description":  "Drafts a Jira Epic/Task structure for a given feature description.",
+    "Type":  "reasoning",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+                                           "featureDescription":  {
+                                                                      "type":  "string"
+                                                                  }
+                                       },
+                        "required":  [
+                                         "featureDescription"
+                                     ]
+                    },
+    "OutputSchema":  {
+                         "type":  "object"
+                     },
+    "HandlerRoute":  "momo.crm.draft_task_breakdown",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

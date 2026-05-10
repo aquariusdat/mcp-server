@@ -1,0 +1,26 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000001",
+    "Code":  "momo_crm_get_conventions",
+    "Name":  "Get Team Conventions",
+    "Description":  "Returns deterministic CRM engineering conventions (tech stack, Jira rules, DoD).",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "object"
+                     },
+    "HandlerRoute":  "momo.crm.get_conventions",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

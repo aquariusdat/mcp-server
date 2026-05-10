@@ -1,0 +1,26 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000003",
+    "Code":  "momo_crm_get_team_members",
+    "Name":  "Get Team Members",
+    "Description":  "Returns list of developers, QA, BA in the CRM team.",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "array"
+                     },
+    "HandlerRoute":  "momo.crm.get_team_members",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

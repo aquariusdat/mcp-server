@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using MoMo.McpServer.Application.Runtime;
 
@@ -20,7 +21,8 @@ namespace MoMo.McpServer.Api.Runtime;
 [McpServerToolType]
 public sealed class McpToolProvider(
     IToolCapabilityProvider capabilityProvider,
-    IToolRegistry toolRegistry)
+    IToolRegistry toolRegistry,
+    ILogger<McpToolProvider> logger)
 {
     private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
 
@@ -49,37 +51,59 @@ public sealed class McpToolProvider(
     /// Invokes a registered MoMo tool by its code.
     /// Returns an error message if the tool is not found or no executor is registered.
     /// </summary>
-    [McpServerTool(Name = "momo_invoke_tool")]
-    [Description("Invoke a registered MoMo tool by its code with the provided arguments")]
+    [McpServerTool("momo_invoke_tool", Description = "Invokes a specific CRM tool by its route code (e.g. momo.crm.get_team_members).")]
     public async Task<string> InvokeToolAsync(
-        [Description("The tool code to invoke (e.g. 'crm.get_customer')")] string toolCode,
-        [Description("JSON string of key-value arguments for the tool")] string argumentsJson = "{}",
+        [Description("The HandlerRoute of the tool to invoke")] string toolRouteCode,
+        [Description("The JSON arguments required by the tool's input schema")] JsonNode arguments,
         CancellationToken cancellationToken = default)
     {
-        // Resolve the tool definition
-        var tool = await capabilityProvider.FindEnabledToolAsync(toolCode, cancellationToken);
-        if (tool is null)
-            return JsonSerializer.Serialize(ToolExecutionResult.Error($"Tool '{toolCode}' not found or is disabled."), JsonOpts);
+        logger.LogInformation("==================================================");
+        logger.LogInformation("🤖 CLAUDE INVOKED TOOL: {ToolRoute}", toolRouteCode);
+        logger.LogInformation("📦 ARGUMENTS: {Args}", arguments.ToJsonString());
+        
+        var definitions = await capabilityProvider.GetEnabledCapabilitiesAsync(cancellationToken);
+        var targetTool = definitions.FirstOrDefault(t => 
+            string.Equals(t.HandlerRoute, toolRouteCode, StringComparison.OrdinalIgnoreCase));
 
-        // Resolve the executor
-        var executor = toolRegistry.Resolve(tool.HandlerRoute);
+        if (targetTool is null)
+        {
+            logger.LogWarning("❌ Tool invocation failed: Route '{ToolRoute}' not found or disabled.", toolRouteCode);
+            return $"Error: Tool with route '{toolRouteCode}' not found or not enabled.";
+        }
+
+        var executor = toolRegistry.Resolve(targetTool.HandlerRoute);
         if (executor is null)
-            return JsonSerializer.Serialize(ToolExecutionResult.Error($"Tool '{toolCode}' has no registered executor (HandlerRoute: '{tool.HandlerRoute}'). Register an IToolExecutor implementation."), JsonOpts);
+        {
+            logger.LogWarning("❌ Tool invocation failed: No executor mapped for route '{ToolRoute}'.", targetTool.HandlerRoute);
+            return $"Error: Tool '{toolRouteCode}' is enabled but has no concrete executor registered.";
+        }
 
-        // Parse arguments
-        IReadOnlyDictionary<string, string?> args;
+        // Convert JsonNode back to a Dictionary for the executor context
+        var dictArgs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (arguments is JsonObject jsonObj)
+        {
+            foreach (var kvp in jsonObj)
+            {
+                dictArgs[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+            }
+        }
+
+        var context = new ToolExecutionContext(targetTool.HandlerRoute, dictArgs);
+        
         try
         {
-            args = JsonSerializer.Deserialize<Dictionary<string, string?>>(argumentsJson)
-                   ?? new Dictionary<string, string?>();
+            var result = await executor.ExecuteAsync(context, cancellationToken);
+            logger.LogInformation("✅ TOOL EXECUTION SUCCESS. Length: {Length} chars.", result.Data?.Length ?? 0);
+            logger.LogInformation("==================================================");
+            return result.IsSuccess 
+                ? result.Data ?? "Success" 
+                : $"Execution Failed: {result.Error}";
         }
-        catch
+        catch (Exception ex)
         {
-            return JsonSerializer.Serialize(ToolExecutionResult.Error("argumentsJson is not valid JSON."), JsonOpts);
+            logger.LogError(ex, "❌ TOOL EXECUTION CRASHED: {ToolRoute}", toolRouteCode);
+            logger.LogInformation("==================================================");
+            return $"Execution Failed with Exception: {ex.Message}";
         }
-
-        var context = new ToolExecutionContext(tool.HandlerRoute, args);
-        var result = await executor.ExecuteAsync(context, cancellationToken);
-        return JsonSerializer.Serialize(result, JsonOpts);
     }
 }

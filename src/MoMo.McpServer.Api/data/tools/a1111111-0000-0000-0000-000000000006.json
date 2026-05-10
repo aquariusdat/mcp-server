@@ -1,0 +1,26 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000006",
+    "Code":  "momo_crm_get_service_ownership",
+    "Name":  "Get Service Ownership",
+    "Description":  "Returns module/service owners (e.g. who owns AML or KYC).",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "object"
+                     },
+    "HandlerRoute":  "momo.crm.get_service_ownership",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

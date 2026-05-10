@@ -87,3 +87,16 @@ Providers in `Api/Runtime/` (e.g., `McpToolProvider`) must NEVER access reposito
 3. The definition/execution boundary (`IToolRegistry` + `IToolExecutor`).
 4. Schema modeling (`JsonNode`).
 5. Route prefix convention (`/admin/` for management, `/mcp` for runtime).
+
+---
+
+## CRM JSM Mock Setup (Demo / Planning Phase)
+
+To facilitate realistic AI-assisted Jira planning demos without calling real Atlassian APIs, a mock environment has been implemented strictly within the **Infrastructure** layer:
+
+- **Mock Database**: `CrmMockDatabase` stores static facts (Team, Skills, Workloads).
+- **Fact Executors**: Read-only executors that return hard facts (e.g. `GetTeamMembersExecutor`).
+- **Reasoning Executors**: Provide deterministic simulated logic (e.g. `DraftTaskBreakdownExecutor` uses templates, `BulkCreateTasksExecutor` generates fake `CRM-XXXX` keys).
+- **Registry**: `DictionaryToolRegistry` maps `momo.crm.*` routes to these executors.
+
+**Important Rule**: Claude MUST reason ON TOP OF facts. The tools provide the facts (who is in the team, what is the capacity), and Claude makes suggestions. Some tools provide "Mock Reasoning" (`suggest_assignee`) just to enforce a deterministic outcome for the demo.

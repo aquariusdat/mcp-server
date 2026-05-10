@@ -1,0 +1,26 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000002",
+    "Code":  "momo_crm_get_project_structure",
+    "Name":  "Get Project Structure",
+    "Description":  "Returns CRM systems and modules (KYC, AML, Onboarding).",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "object"
+                     },
+    "HandlerRoute":  "momo.crm.get_project_structure",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

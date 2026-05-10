@@ -1,0 +1,28 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000007",
+    "Code":  "momo_crm_search_tickets",
+    "Name":  "Search Existing Tickets",
+    "Description":  "Searches historical Jira tickets.",
+    "Type":  "lookup",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+                                           "query":  {
+                                                         "type":  "string"
+                                                     }
+                                       }
+                    },
+    "OutputSchema":  {
+                         "type":  "array"
+                     },
+    "HandlerRoute":  "momo.crm.search_tickets",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}

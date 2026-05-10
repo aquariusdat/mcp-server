@@ -1,0 +1,35 @@
+{
+    "Id":  "a1111111-0000-0000-0000-000000000013",
+    "Code":  "momo_crm_bulk_create_tasks",
+    "Name":  "Bulk Create Jira Tasks",
+    "Description":  "Simulates creating tickets in Jira. Returns generated Issue Keys.",
+    "Type":  "action",
+    "Category":  "crm_mock",
+    "Tags":  [
+                 "crm",
+                 "planning",
+                 "action"
+             ],
+    "Enabled":  true,
+    "Version":  1,
+    "InputSchema":  {
+                        "type":  "object",
+                        "properties":  {
+                                           "tasks":  {
+                                                         "type":  "array",
+                                                         "items":  {
+                                                                       "type":  "object"
+                                                                   }
+                                                     }
+                                       },
+                        "required":  [
+                                         "tasks"
+                                     ]
+                    },
+    "OutputSchema":  {
+                         "type":  "array"
+                     },
+    "HandlerRoute":  "momo.crm.bulk_create_tasks",
+    "CreatedAt":  "2026-05-10T00:00:00Z",
+    "UpdatedAt":  "2026-05-10T00:00:00Z"
+}
