@@ -3,7 +3,7 @@ using System.Text.Json;
 using ModelContextProtocol.Server;
 using MoMo.McpServer.Application.Runtime;
 
-namespace MoMo.McpServer.Api.Runtime;
+namespace MoMo.McpServer.Runtime.Stdio.Providers;
 
 /// <summary>
 /// MCP Runtime Prompt provider.

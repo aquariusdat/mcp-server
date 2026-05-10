@@ -25,7 +25,7 @@ public static class InfrastructureServiceExtensions
         var configuredPath = configuration["Storage:BasePath"];
         var basePath = string.IsNullOrWhiteSpace(configuredPath)
             ? Path.Combine(contentRootPath, "data")
-            : configuredPath;
+            : Path.GetFullPath(Path.Combine(contentRootPath, configuredPath));
 
         services.Configure<StorageOptions>(opts => opts.BasePath = basePath);
 
